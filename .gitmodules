@@ -1,0 +1,9 @@
+[submodule "externals/graphite-web"]
+	path = externals/graphite-web
+	url = git://github.com/jantman/rpm-graphite-web.git
+[submodule "externals/carbon"]
+	path = externals/carbon
+	url = git://github.com/jantman/rpm-carbon.git
+[submodule "externals/whisper"]
+	path = externals/whisper
+	url = git://github.com/jantman/rpm-whisper.git

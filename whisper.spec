@@ -1,0 +1,1 @@
+externals/whisper/SPECS/whisper.spec
