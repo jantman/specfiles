@@ -6,6 +6,10 @@
 %global git_commit_hash cd01361
 %global github_seq 7
 
+%if 0%{?el5}
+%define __python /usr/bin/python26
+%endif
+
 Name:           http-parser
 Version:        %{somajor}.%{sominor}
 Release:        3.%{git_date}git%{git_commit_hash}%{?dist}
@@ -23,6 +27,9 @@ BuildRoot:      %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 Patch1:		http-parser-gyp-sharedlib.patch
 
 BuildRequires:	gyp
+%if 0%{?el5}
+BuildRequires:	python26
+%endif
 
 %description
 This is a parser for HTTP messages written in C. It parses both requests and
@@ -50,6 +57,10 @@ Development headers and libraries for http-parser.
 %build
 # TODO: fix -fPIC upstream
 export CFLAGS='%{optflags} -fPIC'
+%if 0%{?el5}
+export python=%{__python}
+export PYTHON=%{__python}
+%endif
 gyp -f make --depth=`pwd` http_parser.gyp
 make %{?_smp_mflags} BUILDTYPE=Release 
 
