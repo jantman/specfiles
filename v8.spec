@@ -21,9 +21,11 @@
 
 # %%global svnver 20110721svn8716
 
+%{!?python_sitelib: %define python_sitelib %(%{__python} -c "import distutils.sysconfig as d; print d.get_python_lib()")}
+
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	2%{?dist}
+Release:	5%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -32,7 +34,7 @@ URL:		http://code.google.com/p/v8
 Source0:	http://commondatastorage.googleapis.com/chromium-browser-official/v8-%{version}.tar.bz2
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 ExclusiveArch:	%{ix86} x86_64 %{arm}
-BuildRequires:	scons, readline-devel, libicu-devel
+BuildRequires:	scons, readline-devel, libicu-devel, ncurses-devel
 
 %description
 V8 is Google's open source JavaScript engine. V8 is written in C++ and is used 
@@ -51,8 +53,13 @@ Development headers and libraries for v8.
 %setup -q -n %{name}-%{version}
 
 # -fno-strict-aliasing is needed with gcc 4.4 to get past some ugly code
-PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS -fPIC -fno-strict-aliasing -Wno-unused-parameter -Wno-error=strict-overflow -Wno-error=unused-local-typedefs -Wno-unused-but-set-variable\'| sed "s/ /',/g" | sed "s/',/', '/g"`
+%if 0%{?el5}
+PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS -fPIC -fno-strict-aliasing -Wno-unused-parameter -lncurses\'| sed "s/ /',/g" | sed "s/',/', '/g"`
 sed -i "s|'-O3',|$PARSED_OPT_FLAGS,|g" SConstruct
+%else
+PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS -fPIC -fno-strict-aliasing -Wno-unused-parameter -Wno-error=strict-overflow -Wno-unused-but-set-variable\'| sed "s/ /',/g" | sed "s/',/', '/g"`
+sed -i "s|'-O3',|$PARSED_OPT_FLAGS,|g" SConstruct
+%endif
 
 # clear spurious executable bits
 find . \( -name \*.cc -o -name \*.h -o -name \*.py \) -a -executable \
@@ -198,6 +205,17 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Thu Jan 31 2013 Jason Antman <Jason.Antman@cmgdigital.com> - 1:3.13.7.5-5
+- remove -Werror=unused-local-typedefs on cent6
+
+* Wed Jan 30 2013 Jason Antman <Jason.Antman@cmgdigital.com> - 1:3.13.7.5-4
+- define python_sitelib if it isn't already (CentOS 5)
+
+* Wed Jan 30 2013 Jason Antman <Jason.Antman@cmgdigital.com> - 1:3.13.7.5-3
+- pull 3.13.7.5-2 SRPM from Fedora 19 Koji most recent build
+- add ncurses-devel BuildRequires
+- modify PARSED_OPT_FLAGS to work with g++ 4.1.2 on CentOS 5
+ 
 * Sat Jan 26 2013 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1:3.13.7.5-2
 - rebuild for icu-50
 - ignore new GCC 4.8 warning
