@@ -1,6 +1,14 @@
+%if 0%{?rhel}
+# work around to allow us to find provides/requires with rpm < 4.9,
+# which do not understand the magic in /usr/lib/rpm/nodejs.(req|prov)
+%global __find_provides %{_rpmconfigdir}/nodejs.prov
+%global __find_requires %{_rpmconfigdir}/nodejs.req 
+%global _use_internal_dependency_generator 0
+%endif
+
 Name:       npm
 Version:    1.2.1
-Release:    2%{?dist}
+Release:    3%{?dist}
 Summary:    Node.js Package Manager
 License:    MITNFA
 Group:      Development/Tools
@@ -9,7 +17,16 @@ Source0:    http://registry.npmjs.org/npm/-/npm-%{version}.tgz
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:  noarch
 
-BuildRequires: nodejs-devel
+BuildRequires: nodejs-devel nodejs
+%if 0%{?rhel}
+# this will ONLY build with the macros, scripts, etc. from redhat-rpm-config
+BuildRequires: redhat-rpm-config
+BuildRequires: /usr/bin/python
+
+# CentOS 6.x and lower use rpm < 4.9, so they don't understand the fancy new automatic
+# dependency generation for scripting languages
+Requires: /bin/sh /bin/bash /usr/bin/env /usr/bin/node
+%endif
 
 %description
 npm is a package manager for node.js. You can use it to install and publish your
@@ -93,6 +110,13 @@ rm -rf %{buildroot}
 %doc AUTHORS doc/* html README.md LICENSE
 
 %changelog
+* Wed Feb 06 2013 Jason Antman <Jason.Antman@cmgdigital.com> - 1.2.1-3
+- add if block to set __find_provides and __find_requires on EL5/6, since
+  rpm <= 4.9 doesn't know about the fancy logic triggered by
+  /usr/lib/rpm/fileattrs/nodejs.attr from the nodejs/nodejs-devel package
+- the required RPM macros and scripts are in nodejs not nodejs-devel,
+  so install that too.
+
 * Sat Jan 19 2013 T.C. Hollingsworth <tchollingsworth@gmail.com> - 1.2.1-2
 - fix rpmlint warnings
 

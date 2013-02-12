@@ -21,9 +21,11 @@
 
 # %%global svnver 20110721svn8716
 
+%{!?python_sitelib: %define python_sitelib %(%{__python} -c "import distutils.sysconfig as d; print d.get_python_lib()")}
+
 Name:		v8
 Version:	%{somajor}.%{sominor}.%{sobuild}.%{sotiny}
-Release:	3%{?dist}
+Release:	5%{?dist}
 Epoch:		1
 Summary:	JavaScript Engine
 Group:		System Environment/Libraries
@@ -52,10 +54,10 @@ Development headers and libraries for v8.
 
 # -fno-strict-aliasing is needed with gcc 4.4 to get past some ugly code
 %if 0%{?el5}
-PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS -fPIC -fno-strict-aliasing -Wno-unused-parameter -Wno-error=strict-overflow -Wno-error=unused-local-typedefs -Wno-unused-but-set-variable\'| sed "s/ /',/g" | sed "s/',/', '/g"`
+PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS -fPIC -fno-strict-aliasing -Wno-unused-parameter -lncurses\'| sed "s/ /',/g" | sed "s/',/', '/g"`
 sed -i "s|'-O3',|$PARSED_OPT_FLAGS,|g" SConstruct
 %else
-PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS -fPIC -fno-strict-aliasing -Wno-unused-parameter -lncurses\'| sed "s/ /',/g" | sed "s/',/', '/g"`
+PARSED_OPT_FLAGS=`echo \'$RPM_OPT_FLAGS -fPIC -fno-strict-aliasing -Wno-unused-parameter -Wno-error=strict-overflow -Wno-unused-but-set-variable\'| sed "s/ /',/g" | sed "s/',/', '/g"`
 sed -i "s|'-O3',|$PARSED_OPT_FLAGS,|g" SConstruct
 %endif
 
@@ -203,6 +205,12 @@ rm -rf %{buildroot}
 %{python_sitelib}/j*.py*
 
 %changelog
+* Thu Jan 31 2013 Jason Antman <Jason.Antman@cmgdigital.com> - 1:3.13.7.5-5
+- remove -Werror=unused-local-typedefs on cent6
+
+* Wed Jan 30 2013 Jason Antman <Jason.Antman@cmgdigital.com> - 1:3.13.7.5-4
+- define python_sitelib if it isn't already (CentOS 5)
+
 * Wed Jan 30 2013 Jason Antman <Jason.Antman@cmgdigital.com> - 1:3.13.7.5-3
 - pull 3.13.7.5-2 SRPM from Fedora 19 Koji most recent build
 - add ncurses-devel BuildRequires

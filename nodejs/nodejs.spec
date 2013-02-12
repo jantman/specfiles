@@ -1,6 +1,15 @@
+
+%if 0%{?rhel}
+# work around to allow us to find provides/requires with rpm < 4.9,
+# which do not understand the magic in /usr/lib/rpm/nodejs.(req|prov)
+%global __find_provides %{_rpmconfigdir}/nodejs.prov
+%global __find_requires %{_rpmconfigdir}/nodejs.req
+%global _use_internal_dependency_generator 0
+%endif
+
 Name: nodejs
 Version: 0.9.5
-Release: 9%{?dist}
+Release: 11%{?dist}
 Summary: JavaScript runtime
 License: MIT and ASL 2.0 and ISC and BSD
 Group: Development/Languages
@@ -25,10 +34,20 @@ Source6: nodejs-fixdep
 BuildRequires: v8-devel >= %{v8_ge}
 BuildRequires: http-parser-devel >= 2.0
 BuildRequires: libuv-devel
-BuildRequires: c-ares-devel
+BuildRequires: c-ares-devel >= 1.9.0
 BuildRequires: zlib-devel
 # Node.js requires some features from openssl 1.0.1 for SPDY support
 BuildRequires: openssl-devel >= 1:1.0.1
+
+%if 0%{?rhel}
+# this will ONLY build with the macros, scripts, etc. from redhat-rpm-config
+BuildRequires: redhat-rpm-config
+BuildRequires: /usr/bin/python
+
+# CentOS 6.x and lower use rpm < 4.9, so they don't understand the fancy new automatic
+# dependency generation for scripting languages
+Requires: /bin/sh /bin/bash /usr/bin/env
+%endif
 
 Requires: v8%{?isa} >= %{v8_ge}
 Requires: v8%{?isa} < %{v8_lt}
@@ -165,9 +184,18 @@ cp -p common.gypi %{buildroot}%{_datadir}/node
 
 %files docs
 %{_defaultdocdir}/%{name}-docs-%{version}
-%doc LICENSE
 
 %changelog
+* Thu Feb 07 2013 Jason Antman <Jason.Antman@cmgdigital.com> - 0.9.5-11
+- setup to build on CentOS 6 - force __find_provides and __find_requires to the scripts from nodejs/nodejs-devel
+- force old external dependency generator, as the fancy logic triggered by /usr/lib/rpm/fileattrs/nodejs.attr isn't recognized by rpm < 4.9.0
+- Also build requires nodejs, as the rpm macros and scripts are in that package instead of nodejs-devel.
+
+* Thu Jan 31 2013 Jason Antman <Jason.Antman@cmgdigital.com> - 0.9.5-10
+- specify build requirement of c-ares-devel >= 1.9.0
+- specify build requirement of libuv-devel 0.9.4
+- remove duplicate %doc LICENSE that was causing cpio 'Bad magic' error on CentOS6
+
 * Sat Jan 12 2013 T.C. Hollingsworth <tchollingsworth@gmail.com> - 0.9.5-9
 - fix brown paper bag bug in requires generation script
 

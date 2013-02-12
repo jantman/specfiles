@@ -1,6 +1,15 @@
+
+%if 0%{?rhel}
+# work around to allow us to find provides/requires with rpm < 4.9,
+# which do not understand the magic in /usr/lib/rpm/nodejs.(req|prov)
+%global __find_provides %{_rpmconfigdir}/nodejs.prov
+%global __find_requires %{_rpmconfigdir}/nodejs.req
+%global _use_internal_dependency_generator 0
+%endif
+
 Name:       nodejs-request
 Version:    2.12.0
-Release:    5%{?dist}
+Release:    6%{?dist}
 Summary:    Simplified HTTP request client
 License:    ASL 2.0
 Group:      Development/Libraries
@@ -13,6 +22,16 @@ BuildArch:  noarch
 Patch1: nodejs-request-unbundle-cookie.patch
 
 BuildRequires:  nodejs-devel
+
+%if 0%{?rhel}
+# this will ONLY build with the macros, scripts, etc. from redhat-rpm-config
+BuildRequires: redhat-rpm-config
+BuildRequires: /usr/bin/python
+
+# CentOS 6.x and lower use rpm < 4.9, so they don't understand the fancy new automatic
+# dependency generation for scripting languages
+Requires: /bin/sh /bin/bash /usr/bin/env
+%endif
 
 # explicit Requires are required because this package is not listed in the npm
 # registry and thus not handled by the automatic dependency generator
@@ -55,6 +74,11 @@ rm -rf %{buildroot}
 %doc README.md LICENSE
 
 %changelog
+* Thu Feb 07 2013 Jason Antman <Jason.Antman@cmgdigital.com> - 2.12.0-6
+- setup to build on CentOS 6 - force __find_provides and __find_requires to the scripts from nodejs/nodejs-devel
+- force old external dependency generator, as the fancy logic triggered by /usr/lib/rpm/fileattrs/nodejs.attr isn't recognized by rpm < 4.9.0
+- Also build requires nodejs, as the rpm macros and scripts are in that package instead of nodejs-devel.
+
 * Tue Jan 29 2013 T.C. Hollingsworth <tchollingsworth@gmail.com> - 2.12.0-5
 - actually make patch work
 - fix typo

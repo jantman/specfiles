@@ -22,8 +22,15 @@ URL:		http://code.google.com/p/gyp/
 # 5. tar -a --exclude-vcs -cf /tmp/gyp-$version-svn$revision.tar.bz2 *
 Source0:	%{archivename}.tar.bz2
 Patch0:		gyp-rpmoptflags.patch
+%if 0%{?el5}
+Patch1:		gyp-cent5-python24.patch
+
+BuildRequires:  python26-devel
+%else
 
 BuildRequires:	python2-devel
+%endif
+
 BuildArch:	noarch
 
 %description
@@ -38,6 +45,9 @@ irreconcilable differences.
 %prep
 %setup -q -c -n %{archivename}
 %patch0 -p1 -b .0-rpmoptflags
+%if 0%{?el5}
+%patch1 -p1
+%endif
 for i in $(find pylib -name '*.py'); do
 	sed -e '\,#![ \t]*/.*python,{d}' $i > $i.new && touch -r $i $i.new && mv $i.new $i
 done
