@@ -12,6 +12,13 @@ Packages
 * npm.spec - Node Package Manager
 * v8.spec - [Google v8 Javascript Engine](http://code.google.com/p/v8/), modified from Fedora 19 Rawhide specfile, dependency of nodejs.
 
+Utility Scripts
+---------------
+* centos_fix_nodejs_spec.py - script to "fix" the upstream specfiles for nodejs modules:
+** add some missing things to buildrequires and requires
+** override globals for __find_provides and __find_requires
+** add changelog comment
+** bump release number
 
 nodejs/npm modules converted to RPM
 ------------------------------------
