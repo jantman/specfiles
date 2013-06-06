@@ -1,0 +1,1 @@
+externals/nodejs-centos5/nodejs.spec

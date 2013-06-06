@@ -1,6 +1,8 @@
 nodejs specfiles
 ================
 
+__NOTICE__: These packages are now included in the [EPEL 6](http://fedoraproject.org/wiki/EPEL) repository. As such, I won't be maintaining thse specs any more. Please use the packages from EPEL and only use this as a reference.
+
 A collection of specfiles to build nodejs 0.9.5, npm and their dependencies on CentOS 6 (and maybe 5 if I ever get around to it). These are derived from the SRPMs currently in Fedora's Koji build system for fc19/Rawhide. For more information about these packages, see the following bugs in Fedora's Bugzilla: [908882](https://bugzilla.redhat.com/show_bug.cgi?id=908882).
 
 Packages
